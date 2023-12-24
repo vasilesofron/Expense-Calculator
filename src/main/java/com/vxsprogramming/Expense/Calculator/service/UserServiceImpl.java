@@ -1,10 +1,12 @@
 package com.vxsprogramming.Expense.Calculator.service;
 
+import com.vxsprogramming.Expense.Calculator.dto.UserLoginDto;
 import com.vxsprogramming.Expense.Calculator.dto.UserRegisterDto;
 import com.vxsprogramming.Expense.Calculator.exception.EmailAlreadyInUseException;
 import com.vxsprogramming.Expense.Calculator.exception.UsernameAlreadyInUseException;
 import com.vxsprogramming.Expense.Calculator.model.User;
 import com.vxsprogramming.Expense.Calculator.repository.UserRepository;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,6 +22,9 @@ public class UserServiceImpl implements UserService{
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
+
+    @Autowired
+    private HttpSession session;
 
     public void registerUser(@Valid UserRegisterDto userRegisterDto){
         // Checking if the email is available.
@@ -37,6 +42,21 @@ public class UserServiceImpl implements UserService{
         // Saving the user.
         userRepository.save(user);
     }
+
+    public User loginUser(@Valid UserLoginDto userLoginDto){
+        User user = userRepository.findByEmail(userLoginDto.getEmail());
+
+        if(user != null && passwordEncoder.matches(userLoginDto.getPassword(), user.getPassword())){
+            return user;
+        }
+        return null;
+    }
+
+    public void logoutUser(){
+        session.invalidate();
+    }
+
+
 
 
 
